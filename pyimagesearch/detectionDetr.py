@@ -33,7 +33,7 @@ def rescale_centroids(out_bbox, size):
     c = c * torch.tensor([img_w, img_h], dtype=torch.float32)
     return c
 
-def detect(im, model, transform):
+def detect_people(im, model, transform):
     # mean-std normalize the input image (batch-size: 1)
     img = transform(im).unsqueeze(0)
 

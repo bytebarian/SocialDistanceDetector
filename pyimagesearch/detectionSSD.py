@@ -3,7 +3,7 @@ from .social_distancing_config import MIN_CONF
 import numpy as np
 import cv2
 
-def detectSsd(frame, net, CLASSES):
+def detect_people(frame, net):
     # grab the frame dimensions and convert it to a blob
     (h, w) = frame.shape[:2]
     blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)),

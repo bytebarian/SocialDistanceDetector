@@ -1,9 +1,10 @@
+import os
+
+import cv2
+
+from pyimagesearch import social_distancing_config as config
 from pyimagesearch.Detector import Detector
 from pyimagesearch.detectionYOLO import detect_people
-from pyimagesearch import social_distancing_config as config
-import imutils
-import cv2
-import os
 
 
 class DetectorYOLO(Detector):
