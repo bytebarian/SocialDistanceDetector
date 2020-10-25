@@ -72,7 +72,7 @@ def detect_people(frame, net, ln, personIdx=0):
 			# update our results list to consist of the person
 			# prediction probability, bounding box coordinates,
 			# and the centroid
-			r = (confidences[i], (x, y, x + w, y + h), centroids[i])
+			r = ((x, y, x + w, y + h), centroids[i])
 			results.append(r)
 
 	# return the list of results
