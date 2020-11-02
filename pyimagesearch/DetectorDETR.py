@@ -27,6 +27,5 @@ class DetectorDetr(Detector):
 
     def detect(self, frame):
         im = Image.fromarray(frame)
-        scores, boxes = detect(im, self.detr, self.transform, self.DEVICE)
-        result = filter_boxes(scores, boxes)
-        return result
+        boxes, scores = detect(im, self.detr, self.transform, self.DEVICE)
+        return boxes, scores

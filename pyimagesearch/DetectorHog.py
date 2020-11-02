@@ -11,5 +11,5 @@ class DetectorHog(Detector):
         self.hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
     def detect(self, frame):
-        result = detect_people(frame, self.hog)
-        return result
+        boxes, confidences = detect_people(frame, self.hog)
+        return boxes, confidences

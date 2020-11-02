@@ -29,7 +29,8 @@ def detect(im, model, transform, device='cpu'):
     probas = outputs['pred_logits'].softmax(-1)[0, :, :-1].cpu()
     # convert boxes from [0; 1] to image scales
     bboxes_scaled = rescale_bboxes(outputs['pred_boxes'][0,].cpu(), im.size)
-    return probas, bboxes_scaled
+    boxes, scores = filter_boxes(probas, bboxes_scaled)
+    return boxes, scores
 
 
 def filter_boxes(scores, boxes, confidence=0.7, apply_nms=True, iou=0.5):
@@ -41,7 +42,8 @@ def filter_boxes(scores, boxes, confidence=0.7, apply_nms=True, iou=0.5):
         keep = batched_nms(boxes, top_scores, labels, iou)
         scores, boxes = scores[keep], boxes[keep]
 
-    results = []
+    filtered_boxes = []
+    filtered_scores = []
 
     for i in range(boxes.shape[0]):
         class_id = scores[i].argmax()
@@ -49,9 +51,8 @@ def filter_boxes(scores, boxes, confidence=0.7, apply_nms=True, iou=0.5):
         if class_id == 1:
             width = x1 - x0
             height = y1 - y0
-            centerX = int(x0 + (width / 2))
-            centerY = int(y0 + (height / 2))
-            r = ((x0, y0, int(x0 + width), int(y0 + height)), (centerX, centerY))
-            results.append(r)
+            r = (int(x0), int(y0), int(width), int(height))
+            filtered_boxes.append(r)
+            filtered_scores.append(float(scores[i].max(-1).values))
 
-    return results
+    return filtered_boxes, filtered_scores

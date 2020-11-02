@@ -15,5 +15,5 @@ class DetectorSSD(Detector):
         self.net = net = cv2.dnn.readNetFromCaffe(prototxt, model)
 
     def detect(self, frame):
-        result = detect_people(frame, self.net)
-        return result
+        boxes, confidences = detect_people(frame, self.net)
+        return boxes, confidences

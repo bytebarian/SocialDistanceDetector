@@ -27,5 +27,5 @@ class DetectorYOLO(Detector):
         self.ln = [self.ln[i[0] - 1] for i in self.net.getUnconnectedOutLayers()]
 
     def detect(self, frame):
-        result = detect_people(frame, self.net, self.ln, 0)
-        return result
+        boxes, confidences = detect_people(frame, self.net, self.ln, 0)
+        return boxes, confidences

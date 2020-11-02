@@ -15,7 +15,8 @@ def detect_people(frame, net):
     # predictions
     net.setInput(blob)
     detections = net.forward()
-    results = []
+    boxes = []
+    confidences = []
 
     # loop over the detections
     for i in np.arange(0, detections.shape[2]):
@@ -32,14 +33,13 @@ def detect_people(frame, net):
             (startX, startY, endX, endY) = box.astype("int")
             width = endX - startX
             height = endY - startY
-            centerX = int(startX + (width / 2))
-            centerY = int(startY + (height / 2))
 
             # update our results list to consist of the person
             # prediction probability, bounding box coordinates,
             # and the centroid
-            r = ((startX, startY, int(startX + width), int(startY + height)), (centerX, centerY))
-            results.append(r)
+            r = (startX, startY, width, height)
+            boxes.append(r)
+            confidences.append(confidence)
 
     # return the list of results
-    return results
+    return boxes, confidences
