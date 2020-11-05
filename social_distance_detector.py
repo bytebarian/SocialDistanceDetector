@@ -66,19 +66,68 @@ while True:
     detector = get_detector(args["algorithm"])
     boxes, scores = detector.detect(frame)
 
-    xywhs = torch.Tensor(boxes)
+    bbox_xcycwh = []
+    confs = []
+    for (i, bbox) in enumerate(boxes):
+        # extract the bounding box and centroid coordinates, then
+        # initialize the color of the annotation
+        startX = bbox[0]
+        startY = bbox[1]
+        w = bbox[2]
+        h = bbox[3]
+        cX = startX + int(w / 2)
+        cY = startY + int(h / 2)
+        bbox_xcycwh.append([cX, cY, w, h])
+        confs.append([scores[i]])
+
+    xywhs = torch.Tensor(bbox_xcycwh)
     confss = torch.Tensor(scores)
 
     # Pass detections to deepsort
     outputs = deepsort.update(xywhs, confss, frame)
 
-    if len(outputs) > 0:
-        bbox_xyxy = outputs[:, :4]
-        identities = outputs[:, -1]
-
     # initialize the set of indexes that violate the minimum social
     # distance
     violate = set()
+
+    if len(outputs) > 0:
+        bbox_xyxy = outputs[:, :4]
+        identities = outputs[:, -1]
+        # loop over the results
+        for (i, bbox) in enumerate(bbox_xyxy):
+            x1, y1, x2, y2 = [int(i) for i in bbox]
+            cX = int((x1 + x2) / 2)
+            cY = int((y1 + y2) / 2)
+            color = (0, 255, 0)
+            id = int(identities[i]) if identities is not None else 0
+            label = '{}{:d}'.format("", id)
+            t_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_PLAIN, 2, 2)[0]
+            # if the index pair exists within the violation set, then
+            # update the color
+            # if i in violate:
+            #    color = (0, 0, 255)
+
+            # draw the centroid coordinates of the person,
+            cv2.circle(frame, (cX, cY), 5, color, 1)
+            cv2.circle(frame, (cX, y2), 5, color, 1)
+            cv2.line(frame, (cX, cY), (cX, y2), color, 1)
+            cv2.putText(frame, label, (x1, y1 + t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 2, [255, 255, 255], 2)
+
+            cv2.circle(frame, (320, 50), 5, (0, 0, 255), -1)
+            cv2.circle(frame, (690, 80), 5, (0, 0, 255), -1)
+            cv2.circle(frame, (579, 313), 5, (0, 0, 255), -1)
+            cv2.circle(frame, (3, 193), 5, (0, 0, 255), -1)
+
+            # calculate pedestrians position from birdview
+            p = (cX, y2)
+            px = (matrix[0][0] * p[0] + matrix[0][1] * p[1] + matrix[0][2]) / (
+                        matrix[2][0] * p[0] + matrix[2][1] * p[1] + matrix[2][2])
+            py = (matrix[1][0] * p[0] + matrix[1][1] * p[1] + matrix[1][2]) / (
+                        matrix[2][0] * p[0] + matrix[2][1] * p[1] + matrix[2][2])
+            p_after = (int(px), int(py))
+
+            cv2.circle(birdview, p_after, 5, color, 1)
+            cv2.circle(birdview, p_after, 30, color, 1)
 
     # ensure there are *at least* two people detections (required in
     # order to compute our pairwise distance maps)
@@ -99,41 +148,6 @@ while True:
                     # the centroid pairs
      #               violate.add(i)
      #               violate.add(j)
-
-    # loop over the results
-    for (i, bbox) in enumerate(boxes):
-        # extract the bounding box and centroid coordinates, then
-        # initialize the color of the annotation
-        (startX, startY, w, h) = bbox
-        cX = startX + int(w / 2)
-        cY = startY + int(h / 2)
-        endY = startY + h
-        color = (0, 255, 0)
-
-        # if the index pair exists within the violation set, then
-        # update the color
-        #if i in violate:
-        #    color = (0, 0, 255)
-
-        # draw the centroid coordinates of the person,
-        cv2.circle(frame, (cX, cY), 5, color, 1)
-        cv2.circle(frame, (cX, endY), 5, color, 1)
-        cv2.line(frame, (cX, cY), (cX, endY), color, 1)
-
-        cv2.circle(frame, (320, 50), 5, (0, 0, 255), -1)
-        cv2.circle(frame, (690, 80), 5, (0, 0, 255), -1)
-        cv2.circle(frame, (579, 313), 5, (0, 0, 255), -1)
-        cv2.circle(frame, (3, 193), 5, (0, 0, 255), -1)
-
-        # calculate pedestrians position from birdview
-        p = (cX, endY)
-        px = (matrix[0][0] * p[0] + matrix[0][1] * p[1] + matrix[0][2]) / (matrix[2][0] * p[0] + matrix[2][1] * p[1] + matrix[2][2])
-        py = (matrix[1][0] * p[0] + matrix[1][1] * p[1] + matrix[1][2]) / (matrix[2][0] * p[0] + matrix[2][1] * p[1] + matrix[2][2])
-        p_after = (int(px), int(py))
-
-        cv2.circle(birdview, p_after, 5, color, 1)
-        cv2.circle(birdview, p_after, 30, color, 1)
-
 
     # draw the total number of social distancing violations on the
     # output frame
