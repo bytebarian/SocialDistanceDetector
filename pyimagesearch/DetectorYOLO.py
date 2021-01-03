@@ -2,7 +2,7 @@ import os
 
 import cv2
 
-from pyimagesearch import social_distancing_config as config
+from pyimagesearch import pedestrianTrackerConfig as config
 from pyimagesearch.Detector import Detector
 from pyimagesearch.detectionYOLO import detect_people
 

@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from .social_distancing_config import MIN_CONF
+from .pedestrianTrackerConfig import MIN_CONF
 
 
 def detect_people(frame, net):

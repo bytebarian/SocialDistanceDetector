@@ -1,11 +1,11 @@
 # import the necessary packages
-from .social_distancing_config import NMS_THRESH
-from .social_distancing_config import MIN_CONF
+from .pedestrianTrackerConfig import NMS_THRESH
+from .pedestrianTrackerConfig import MIN_CONF
 import numpy as np
 import cv2
 
 
-def detect_people(frame, net, ln, personIdx=0):
+def detect_people(frame, net, ln, classtoDetectId=0):
     # grab the dimensions of the frame and  initialize the list of
     # results
     (H, W) = frame.shape[:2]
@@ -39,7 +39,7 @@ def detect_people(frame, net, ln, personIdx=0):
             # filter detections by (1) ensuring that the object
             # detected was a person and (2) that the minimum
             # confidence is met
-            if classID == personIdx and confidence > MIN_CONF:
+            if classID == classtoDetectId and confidence > MIN_CONF:
                 # scale the bounding box coordinates back relative to
                 # the size of the image, keeping in mind that YOLO
                 # actually returns the center (x, y)-coordinates of

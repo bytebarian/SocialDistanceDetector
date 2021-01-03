@@ -5,7 +5,7 @@ from PIL import Image
 
 torch.set_grad_enabled(False)
 
-from pyimagesearch import social_distancing_config as config
+from pyimagesearch import pedestrianTrackerConfig as config
 from pyimagesearch.DETR import DETR
 from pyimagesearch.Detector import Detector
 from pyimagesearch.detectionDetr import detect, filter_boxes
